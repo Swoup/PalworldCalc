@@ -33,10 +33,13 @@ namespace PalworldCalculator
         }
 
         [Test]
-        public void Should_find_weaknesses_related_dualtype()
+        public void Should_cancel_out_weaknesses_dualtype()
         {
             Typing typing = new(PalTypes.Leaf, PalTypes.Water);
             Assert.That(typing.Weaknesses, Is.EqualTo(PalTypes.Electricity));
+
+            typing = new(PalTypes.Ice, PalTypes.Dragon);
+            Assert.That(typing.Weaknesses, Is.EqualTo((PalTypes)24));
         }
 
         [Test]
@@ -44,6 +47,13 @@ namespace PalworldCalculator
         {
             Typing typing = new(PalTypes.Water, PalTypes.None);
             Assert.That(typing.Strengths, Is.EqualTo(PalTypes.Fire));
+        }
+
+         [Test]
+        public void Should_find_normal_dark_is_effective_to_only_one_type()
+        {
+            Typing typing = new(PalTypes.Normal, PalTypes.Dark);
+            Assert.That(typing.Strengths, Is.EqualTo(PalTypes.Normal));
         }
 
         [Test]
@@ -58,6 +68,9 @@ namespace PalworldCalculator
         {
             Typing typing = new(PalTypes.Fire, PalTypes.Dragon);
             Assert.That(typing.Strengths, Is.EqualTo((PalTypes)266));
+
+            typing = new(PalTypes.Ice, PalTypes.Dragon);
+            Assert.That(typing.Strengths, Is.EqualTo((PalTypes)6));
         }
 
         [Test]
