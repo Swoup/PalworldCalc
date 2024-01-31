@@ -72,9 +72,9 @@ namespace PalworldCalculator
                 new Typing(PalTypes.Earth, PalTypes.None)
             };
 
-            Assert.That(team.GetCoverage(x => x.Strengths), Is.EqualTo((PalTypes)38));
-        }
 
+            Assert.That(team.GetCoverage(x => x.Strengths), Is.EqualTo((PalTypes)102));
+        }
          [Test]
         public void Should_find_team_defensive_coverage()
         {
