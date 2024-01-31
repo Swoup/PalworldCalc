@@ -17,14 +17,14 @@ var theoricalCombos = actualPalTypes.GetKCombs(5).ToList();
 
 var theoricalCombosByStrengthAndWeaknesses = theoricalCombos.ToLookup(x => new {strength = CountStrengths(x), weakness = CountWeaknesses(x)});
 var ordered = theoricalCombosByStrengthAndWeaknesses.OrderByDescending(x => x.Key.strength).ThenBy(x => x.Key.weakness);
-var bestCombos = ordered.Take(1).SelectMany(x =>x).ToList();
+var bestCombos = ordered./*Take(1).*/SelectMany(x =>x).ToList();
 var palTeams = bestCombos.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => (pal.Melee + pal.Shot) / 2).ThenByDescending(pal => pal.Defence).First()))).ToList();
 var palByName = pals.ToDictionary(x => x.Name, y => y);
-var mountedTeams = palTeams.Where(x => x.Any(y => palByName[y.pal!.Name].Mounted != null)).ToList();
+var mountedTeams = palTeams.Where(x => x.Any(y => palByName[y.pal!.Name].Mounted >= 1300)).ToList();
 var mountedTeamsOrdered = mountedTeams.OrderByDescending(x => x.Max(y => palByName[y.pal!.Name].Mounted)).ToList();
 var bestTeams = mountedTeamsOrdered.OrderByDescending(x => x.Average(pick => (pick.pal.Melee + pick.pal.Shot) / 2)).ToList();
 
-Print(bestTeams, palByName);
+Print(bestTeams.Take(30).ToList(), palByName);
 
 static int CountStrengths(IEnumerable<Typing> source) => CountBits(source, y => y.Strengths);
 static int CountWeaknesses(IEnumerable<Typing> source) => CountBits(source, y => y.Weaknesses);
@@ -39,16 +39,15 @@ static void Print(List<IEnumerable<(Typing typing, Pal pal)>> bestTeams, Diction
             sb.Append(string.Join(", " , $"#{pal.Number} {pal.Name}, "));
         Console.WriteLine(sb);
     }
-
     foreach(var bestTeam in bestTeams)
     {
         Console.WriteLine();
         StringBuilder sb = new();
         StringBuilder candidates = new();
-        foreach ((Typing typing, Pal? pal) pick in bestTeam) 
+        foreach ((Typing typing, Pal? pal) in bestTeam) 
         {
-            sb.Append("[").Append(pick.typing).Append("]").Append(" and ");
-            candidates.Append($"Pal picked for type {pick.typing} is {string.Join(", " , $"#{palByName[pick.pal!.Name].Number} {pick.pal.Name}")} \n");
+            sb.Append('[').Append(typing).Append(']').Append(" and ");
+            candidates.Append($"Pal picked for type {typing} is {string.Join(", " , $"#{palByName[pal!.Name].Number} {pal.Name}")} \n");
         }
         sb.Remove(sb.Length -3, 3);
         Console.WriteLine($"{sb} with offensive coverage {bestTeam.Select(x => x.typing).GetCoverage(x => x.Strengths)} and defensive weaknesses {bestTeam.Select(x => x.typing).GetCoverage(x => x.Weaknesses)}");
