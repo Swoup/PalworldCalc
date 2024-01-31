@@ -30,7 +30,7 @@ var veryBestTypesCombo = bestTypesCombo
 var palByName = pals.ToDictionary(x => x.Name, y => y);
 var palTeams = veryBestTypesCombo.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => pal.Melee > pal.Shot ? pal.Melee : pal.Shot).ThenByDescending(pal => pal.Defence).First())));
 var mountedTeams = palTeams.Where(x => x.Any(y => palByName[y.pal!.Name].Mounted != null)).ToList();
-var speedTeams = mountedTeams.OrderByDescending(x => x.Max(y => palByName[y.pal!.Name].Mounted)).ThenByDescending(x => x.Average(pick => pick.pal.Melee > pick.pal.Shot ? pick.pal.Melee : pick.pal.Shot)).ToList();
+var speedTeams = mountedTeams.OrderByDescending(x => x.Average(pick => pick.pal.Melee > pick.pal.Shot ? pick.pal.Melee : pick.pal.Shot)).ThenByDescending(x => x.Max(y => palByName[y.pal!.Name].Mounted)).ToList();
 
 Print(speedTeams, palByName);
 
