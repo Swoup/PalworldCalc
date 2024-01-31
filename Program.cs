@@ -17,7 +17,7 @@ var theoricalCombos = actualPalTypes.GetKCombs(5).ToList();
 
 var theoricalCombosByStrengthAndWeaknesses = theoricalCombos.ToLookup(x => new {strength = CountStrengths(x), weakness = CountWeaknesses(x)});
 var ordered = theoricalCombosByStrengthAndWeaknesses.OrderByDescending(x => x.Key.strength).ThenBy(x => x.Key.weakness);
-var bestCombos = ordered.First();
+var bestCombos = ordered.Take(1).SelectMany(x =>x).ToList();
 var palTeams = bestCombos.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => (pal.Melee + pal.Shot) / 2).ThenByDescending(pal => pal.Defence).First()))).ToList();
 var palByName = pals.ToDictionary(x => x.Name, y => y);
 var mountedTeams = palTeams.Where(x => x.Any(y => palByName[y.pal!.Name].Mounted != null)).ToList();
@@ -32,7 +32,7 @@ static int CountBits(IEnumerable<Typing> source, Func<Typing, PalTypes> selector
 
 static void Print(List<IEnumerable<(Typing typing, Pal pal)>> bestTeams, Dictionary<string, Pal>  palByName)
 {
-    foreach(var bestTeam in bestTeams.Take(20))
+    foreach(var bestTeam in bestTeams)
     {
         StringBuilder sb = new();
         foreach (var pal in bestTeam.Select(x => x.pal))
@@ -40,7 +40,7 @@ static void Print(List<IEnumerable<(Typing typing, Pal pal)>> bestTeams, Diction
         Console.WriteLine(sb);
     }
 
-    foreach(var bestTeam in bestTeams.Take(10))
+    foreach(var bestTeam in bestTeams)
     {
         Console.WriteLine();
         StringBuilder sb = new();
