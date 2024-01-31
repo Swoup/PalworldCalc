@@ -41,27 +41,27 @@ static int CountBits(IEnumerable<Typing> source, Func<Typing, PalTypes> selector
 static void Print(List<IEnumerable<(Typing typing, Pal pal)>> bestTeams, Dictionary<string, Pal>  palByName)
 {
     foreach(var bestTeam in bestTeams.Take(20))
-{
-    
-    StringBuilder sb = new();
-    foreach (var pal in bestTeam.Select(x => x.pal))
-        sb.Append(string.Join(", " , $"#{pal.Number} {pal.Name}, "));
-    Console.WriteLine(sb);
-}
-
-foreach(var bestTeam in bestTeams.Take(10))
-{
-    Console.WriteLine();
-    StringBuilder sb = new();
-    StringBuilder candidates = new();
-    foreach ((Typing typing, Pal? pal) pick in bestTeam) 
     {
-        sb.Append("[").Append(pick.typing).Append("]").Append(" and ");
-        candidates.Append($"Pal picked for type {pick.typing} is {string.Join(", " , $"#{palByName[pick.pal!.Name].Number} {pick.pal.Name}")} \n");
+        
+        StringBuilder sb = new();
+        foreach (var pal in bestTeam.Select(x => x.pal))
+            sb.Append(string.Join(", " , $"#{pal.Number} {pal.Name}, "));
+        Console.WriteLine(sb);
     }
-    sb.Remove(sb.Length -3, 3);
-    Console.WriteLine($"{sb} with offensive coverage {bestTeam.Select(x => x.typing).GetCoverage(x => x.Strengths)} and defensive weaknesses {bestTeam.Select(x => x.typing).GetCoverage(x => x.Weaknesses)}");
-    Console.WriteLine($"{candidates}");
-}
-Console.WriteLine();
+
+    foreach(var bestTeam in bestTeams.Take(10))
+    {
+        Console.WriteLine();
+        StringBuilder sb = new();
+        StringBuilder candidates = new();
+        foreach ((Typing typing, Pal? pal) pick in bestTeam) 
+        {
+            sb.Append("[").Append(pick.typing).Append("]").Append(" and ");
+            candidates.Append($"Pal picked for type {pick.typing} is {string.Join(", " , $"#{palByName[pick.pal!.Name].Number} {pick.pal.Name}")} \n");
+        }
+        sb.Remove(sb.Length -3, 3);
+        Console.WriteLine($"{sb} with offensive coverage {bestTeam.Select(x => x.typing).GetCoverage(x => x.Strengths)} and defensive weaknesses {bestTeam.Select(x => x.typing).GetCoverage(x => x.Weaknesses)}");
+        Console.WriteLine($"{candidates}");
+    }
+    Console.WriteLine();
 }
