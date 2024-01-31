@@ -7,7 +7,7 @@ namespace PalworldCalculator
             {PalTypes.Dark, new PalTypes[]{PalTypes.Normal}},
             {PalTypes.Normal, new PalTypes[]{}},
             {PalTypes.Dragon, new PalTypes[]{PalTypes.Dark}},
-            {PalTypes.Ice, new PalTypes[]{PalTypes.Dark}},
+            {PalTypes.Ice, new PalTypes[]{PalTypes.Dragon}},
             {PalTypes.Fire, new PalTypes[]{PalTypes.Ice, PalTypes.Leaf}},
             {PalTypes.Water, new PalTypes[]{PalTypes.Fire}},
             {PalTypes.Electricity, new PalTypes[]{PalTypes.Water}},

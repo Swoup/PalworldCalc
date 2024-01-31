@@ -59,5 +59,34 @@ namespace PalworldCalculator
             Typing typing = new(PalTypes.Fire, PalTypes.Dragon);
             Assert.That(typing.Strengths, Is.EqualTo((PalTypes)266));
         }
+
+        [Test]
+        public void Should_find_team_offensive_coverage()
+        {
+            List<Typing> team = new()
+            {
+                new Typing(PalTypes.Normal, PalTypes.None),
+                new Typing(PalTypes.Ice, PalTypes.None),
+                new Typing(PalTypes.Electricity, PalTypes.None),
+                new Typing(PalTypes.Dragon, PalTypes.Electricity),
+                new Typing(PalTypes.Earth, PalTypes.None)
+            };
+
+            Assert.That(team.GetCoverage(x => x.Strengths), Is.EqualTo((PalTypes)38));
+        }
+
+         [Test]
+        public void Should_find_team_defensive_coverage()
+        {
+            List<Typing> team = new()
+            {
+                new Typing(PalTypes.Normal, PalTypes.None),
+                new Typing(PalTypes.Ice, PalTypes.None),
+                new Typing(PalTypes.Electricity, PalTypes.None),
+                new Typing(PalTypes.Dragon, PalTypes.Electricity),
+                new Typing(PalTypes.Leaf, PalTypes.Water)
+            };
+            Assert.That(team.GetCoverage(x => x.Weaknesses), Is.EqualTo((PalTypes)218));
+        }
     }
 }

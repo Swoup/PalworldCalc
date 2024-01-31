@@ -29,5 +29,7 @@ namespace PalworldCalculator
                 }
                 return iCount;
          }
+
+         public static PalTypes GetCoverage(this IEnumerable<Typing> source, Func<Typing, PalTypes> selector) => source.Select(selector).Aggregate((a, b) => a | b);
     }
 }
