@@ -39,11 +39,11 @@ foreach(var bestTeam in speedTeams.Take(10))
     StringBuilder candidates = new();
     foreach ((Typing typing, Pal? pal) pick in bestTeam) 
     {
-        sb.Append(pick.typing).Append(" and ");
+        sb.Append("[").Append(pick.typing).Append("]").Append(" and ");
         candidates.Append($"Pal picked for type {pick.typing} is {string.Join(", " , $"#{palByName[pick.pal.Name].Number} {pick.pal.Name}")} \n");
     }
     sb.Remove(sb.Length -3, 3);
-    Console.WriteLine($"{sb} with offensive coverage {GetCoverage(bestTeam.Select(x => x.typing), x => x.Strengths)} and defensive coverage {GetCoverage(bestTeam.Select(x => x.typing), x => x.Weaknesses)}");
+    Console.WriteLine($"{sb} with offensive coverage {GetCoverage(bestTeam.Select(x => x.typing), x => x.Strengths)} and defensive weaknesses {GetCoverage(bestTeam.Select(x => x.typing), x => x.Weaknesses)}");
     Console.WriteLine($"{candidates}");
 }
 
