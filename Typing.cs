@@ -2,17 +2,17 @@ namespace PalworldCalculator
 {
     public sealed record Typing : IEquatable<Typing>, IComparable<Typing>, IComparable
     {
-        private static readonly Dictionary<PalTypes, PalTypes[]> strong = new()
+        private static readonly Dictionary<PalTypes, PalTypes> strong = new()
         {
-            {PalTypes.Dark, new PalTypes[]{PalTypes.Normal}},
-            {PalTypes.Normal, new PalTypes[]{}},
-            {PalTypes.Dragon, new PalTypes[]{PalTypes.Dark}},
-            {PalTypes.Ice, new PalTypes[]{PalTypes.Dragon}},
-            {PalTypes.Fire, new PalTypes[]{PalTypes.Ice, PalTypes.Leaf}},
-            {PalTypes.Water, new PalTypes[]{PalTypes.Fire}},
-            {PalTypes.Electricity, new PalTypes[]{PalTypes.Water}},
-            {PalTypes.Earth, new PalTypes[]{PalTypes.Electricity}},
-            {PalTypes.Leaf, new PalTypes[]{PalTypes.Earth}}
+            {PalTypes.Dark, PalTypes.Normal},
+            {PalTypes.Normal, PalTypes.None},
+            {PalTypes.Dragon, PalTypes.Dark},
+            {PalTypes.Ice, PalTypes.Dragon},
+            {PalTypes.Fire, PalTypes.Ice | PalTypes.Leaf},
+            {PalTypes.Water, PalTypes.Fire},
+            {PalTypes.Electricity, PalTypes.Water},
+            {PalTypes.Earth, PalTypes.Electricity},
+            {PalTypes.Leaf, PalTypes.Earth}
         };
 
         private static readonly Dictionary<PalTypes, PalTypes> weak = new()
@@ -37,12 +37,12 @@ namespace PalworldCalculator
             if (b == PalTypes.None)
             {
                 weaknesses = weak[a];
-                strengths = strong[a].Aggregate(PalTypes.None, (x, y) => x | y);
+                strengths = strong[a];
                 type = a;
                 return;
             }
-            strengths = strong[a].Aggregate(PalTypes.None, (x, y) => x | y) | strong[b].Aggregate(PalTypes.None, (x, y) => x | y);
-            weaknesses = weak[a] ^ Array.Find(strong[b], x => x == weak[a]) | weak[b] ^ Array.Find(strong[a], x => x == weak[a]);
+            strengths = strong[a] | strong[b];
+            weaknesses = weak[a] & (~strong[b]) | weak[b] & (~strong[a]);
             type = a | b;
         }
 
