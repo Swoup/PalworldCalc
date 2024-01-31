@@ -11,33 +11,39 @@ using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
 }
 
 
-var typesByPalNames = pals.ToLookup(x => new Typing(x.Type1.GetValueOrDefault(), x.Type2.GetValueOrDefault()), x => x.Name);
-var actualPalTypes = typesByPalNames.Select(x => x.Key);
-var theoricalTeams = actualPalTypes.GetKCombs(5).ToList();
+var palsByType= pals.ToLookup(x => new Typing(x.Type1.GetValueOrDefault(), x.Type2.GetValueOrDefault()), x => x);
+var actualPalTypes = palsByType.Select(x => x.Key);
+var theoricalCombos = actualPalTypes.GetKCombs(5).ToList();
 
-var bestTeams = theoricalTeams
+var bestTypesCombo = theoricalCombos
     .OrderByDescending(CountStrengths)
     .ThenBy(CountWeaknesses)
     .ToList();
 
-var exampleBestTeam = bestTeams.First();
-
-var veryBestTeams = bestTeams
-    .Where(x => CountStrengths(x) == CountStrengths(exampleBestTeam) && CountWeaknesses(x) == CountWeaknesses(exampleBestTeam))
+var exampleBestCombo = bestTypesCombo.First();
+var veryBestTypesCombo = bestTypesCombo
+    .Where(x => CountStrengths(x) == CountStrengths(exampleBestCombo) && CountWeaknesses(x) == CountWeaknesses(exampleBestCombo))
+    .ToLookup(x => x.OrderBy(y => y.Type))
+    .Select(x => x.Key)
     .ToList();
 
-foreach(var bestTeam in veryBestTeams)
+var palByName = pals.ToDictionary(x => x.Name, y => y);
+
+var palTeams = veryBestTypesCombo.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => pal.Melee > pal.Shot ? pal.Melee : pal.Shot).ThenByDescending(pal => pal.Defence).First())));
+var speedTeams = palTeams.OrderByDescending(x => x.Max(y => palByName[y.pal!.Name].Mounted)).ThenByDescending(x => x.Average(pick => pick.pal.Melee > pick.pal.Shot ? pick.pal.Melee : pick.pal.Shot)).ToList();
+
+foreach(var bestTeam in speedTeams.Take(10))
 {
     Console.WriteLine();
     StringBuilder sb = new();
     StringBuilder candidates = new();
-    foreach (var type in bestTeam) 
+    foreach ((Typing typing, Pal? pal) pick in bestTeam) 
     {
-        
-        sb.Append('[').Append(type.Type).Append(']');
-        candidates.Append($"Candidate for type {type} are {string.Join("," , typesByPalNames[type])} \n");
+        sb.Append(pick.typing).Append(" and ");
+        candidates.Append($"Pal picked for type {pick.typing} is {string.Join(", " , $"#{palByName[pick.pal.Name].Number} {pick.pal.Name}")} \n");
     }
-    Console.WriteLine($"{sb} with offensive coverage {GetCoverage(bestTeam, x => x.Strengths)} and defensive coverage {GetCoverage(bestTeam, x => x.Weaknesses)}");
+    sb.Remove(sb.Length -3, 3);
+    Console.WriteLine($"{sb} with offensive coverage {GetCoverage(bestTeam.Select(x => x.typing), x => x.Strengths)} and defensive coverage {GetCoverage(bestTeam.Select(x => x.typing), x => x.Weaknesses)}");
     Console.WriteLine($"{candidates}");
 }
 
