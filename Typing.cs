@@ -34,13 +34,16 @@ namespace PalworldCalculator
 
         public Typing(PalTypes a, PalTypes b)
         {
-            type = a | b;
-            strengths = strong[a].Aggregate(PalTypes.None, (x, y) => x | y) | b;
             if (b == PalTypes.None)
+            {
                 weaknesses = weak[a];
-            else
-                weaknesses = weak[a] ^ Array.Find(strong[b], x => x == weak[a]) | weak[b] ^ Array.Find(strong[a], x => x == weak[a]);
-
+                strengths = strong[a].Aggregate(PalTypes.None, (x, y) => x | y);
+                type = a;
+                return;
+            }
+            strengths = strong[a].Aggregate(PalTypes.None, (x, y) => x | y) | strong[b].Aggregate(PalTypes.None, (x, y) => x | y);
+            weaknesses = weak[a] ^ Array.Find(strong[b], x => x == weak[a]) | weak[b] ^ Array.Find(strong[a], x => x == weak[a]);
+            type = a | b;
         }
 
         public PalTypes Type => type;
