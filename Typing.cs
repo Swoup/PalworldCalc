@@ -11,7 +11,7 @@ namespace PalworldCalculator
             {PalTypes.Fire, new PalTypes[]{PalTypes.Ice, PalTypes.Leaf}},
             {PalTypes.Water, new PalTypes[]{PalTypes.Fire}},
             {PalTypes.Electricity, new PalTypes[]{PalTypes.Water}},
-            {PalTypes.Earth, new PalTypes[]{PalTypes.Water}},
+            {PalTypes.Earth, new PalTypes[]{PalTypes.Electricity}},
             {PalTypes.Leaf, new PalTypes[]{PalTypes.Earth}}
         };
 
