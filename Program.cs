@@ -28,23 +28,28 @@ var veryBestTypesCombo = bestTypesCombo
     .ToList();
 
 var palByName = pals.ToDictionary(x => x.Name, y => y);
-
 var palTeams = veryBestTypesCombo.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => pal.Melee > pal.Shot ? pal.Melee : pal.Shot).ThenByDescending(pal => pal.Defence).First())));
 var mountedTeams = palTeams.Where(x => x.Any(y => palByName[y.pal!.Name].Mounted != null)).ToList();
 var speedTeams = mountedTeams.OrderByDescending(x => x.Max(y => palByName[y.pal!.Name].Mounted)).ThenByDescending(x => x.Average(pick => pick.pal.Melee > pick.pal.Shot ? pick.pal.Melee : pick.pal.Shot)).ToList();
 
-foreach(var bestTeam in speedTeams.Take(20))
+Print(speedTeams, palByName);
+
+static int CountStrengths(IEnumerable<Typing> source) => CountBits(source, y => y.Strengths);
+static int CountWeaknesses(IEnumerable<Typing> source) => CountBits(source, y => y.Weaknesses);
+static int CountBits(IEnumerable<Typing> source, Func<Typing, PalTypes> selector) => source.GetCoverage(selector).GetSetBitCount();
+
+static void Print(List<IEnumerable<(Typing typing, Pal pal)>> bestTeams, Dictionary<string, Pal>  palByName)
+{
+    foreach(var bestTeam in bestTeams.Take(20))
 {
     
     StringBuilder sb = new();
-    foreach ((Typing typing, Pal? pal) pick in bestTeam) 
-    {
-        sb.Append(string.Join(", " , $"#{palByName[pick.pal.Name].Number} {pick.pal.Name}, "));
-    }
+    foreach (var pal in bestTeam.Select(x => x.pal))
+        sb.Append(string.Join(", " , $"#{pal.Number} {pal.Name}, "));
     Console.WriteLine(sb);
 }
 
-foreach(var bestTeam in speedTeams.Take(10))
+foreach(var bestTeam in bestTeams.Take(10))
 {
     Console.WriteLine();
     StringBuilder sb = new();
@@ -52,15 +57,11 @@ foreach(var bestTeam in speedTeams.Take(10))
     foreach ((Typing typing, Pal? pal) pick in bestTeam) 
     {
         sb.Append("[").Append(pick.typing).Append("]").Append(" and ");
-        candidates.Append($"Pal picked for type {pick.typing} is {string.Join(", " , $"#{palByName[pick.pal.Name].Number} {pick.pal.Name}")} \n");
+        candidates.Append($"Pal picked for type {pick.typing} is {string.Join(", " , $"#{palByName[pick.pal!.Name].Number} {pick.pal.Name}")} \n");
     }
     sb.Remove(sb.Length -3, 3);
     Console.WriteLine($"{sb} with offensive coverage {bestTeam.Select(x => x.typing).GetCoverage(x => x.Strengths)} and defensive weaknesses {bestTeam.Select(x => x.typing).GetCoverage(x => x.Weaknesses)}");
     Console.WriteLine($"{candidates}");
 }
 Console.WriteLine();
-
-
-static int CountStrengths(IEnumerable<Typing> source) => CountBits(source, y => y.Strengths);
-static int CountWeaknesses(IEnumerable<Typing> source) => CountBits(source, y => y.Weaknesses);
-static int CountBits(IEnumerable<Typing> source, Func<Typing, PalTypes> selector) => source.GetCoverage(selector).GetSetBitCount();
+}
