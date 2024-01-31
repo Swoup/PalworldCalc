@@ -17,7 +17,7 @@ var theoricalCombos = actualPalTypes.GetKCombs(5).ToList();
 
 var theoricalCombosByStrengthAndWeaknesses = theoricalCombos.ToLookup(x => new {strength = CountStrengths(x), weakness = CountWeaknesses(x)});
 var ordered = theoricalCombosByStrengthAndWeaknesses.OrderByDescending(x => x.Key.strength).ThenBy(x => x.Key.weakness);
-var bestCombos = ordered./*Take(1).*/SelectMany(x =>x).ToList();
+var bestCombos = ordered.Take(2).SelectMany(x =>x).ToList();
 var palTeams = bestCombos.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => (pal.Melee + pal.Shot) / 2).ThenByDescending(pal => pal.Defence).First()))).ToList();
 var palByName = pals.ToDictionary(x => x.Name, y => y);
 var mountedTeams = palTeams.Where(x => x.Any(y => palByName[y.pal!.Name].Mounted >= 1300)).ToList();
