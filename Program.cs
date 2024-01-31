@@ -15,24 +15,16 @@ var palsByType= pals.ToLookup(x => new Typing(x.Type1.GetValueOrDefault(), x.Typ
 var actualPalTypes = palsByType.Select(x => x.Key);
 var theoricalCombos = actualPalTypes.GetKCombs(5).ToList();
 
-var bestTypesCombo = theoricalCombos
-    .OrderByDescending(CountStrengths)
-    .ThenBy(CountWeaknesses)
-    .ToList();
-
-var exampleBestCombo = bestTypesCombo.First();
-var veryBestTypesCombo = bestTypesCombo
-    .Where(x => CountStrengths(x) == CountStrengths(exampleBestCombo) && CountWeaknesses(x) == CountWeaknesses(exampleBestCombo))
-    .ToLookup(x => x.OrderBy(y => y.Type))
-    .Select(x => x.Key)
-    .ToList();
-
+var theoricalCombosByStrengthAndWeaknesses = theoricalCombos.ToLookup(x => new {strength = CountStrengths(x), weakness = CountWeaknesses(x)});
+var ordered = theoricalCombosByStrengthAndWeaknesses.OrderByDescending(x => x.Key.strength).ThenBy(x => x.Key.weakness);
+var bestCombos = ordered.First();
+var palTeams = bestCombos.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => (pal.Melee + pal.Shot) / 2).ThenByDescending(pal => pal.Defence).First()))).ToList();
 var palByName = pals.ToDictionary(x => x.Name, y => y);
-var palTeams = veryBestTypesCombo.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => (pal.Melee + pal.Shot) / 2).ThenByDescending(pal => pal.Defence).First())));
 var mountedTeams = palTeams.Where(x => x.Any(y => palByName[y.pal!.Name].Mounted != null)).ToList();
-var speedTeams = mountedTeams.OrderByDescending(x => x.Max(y => palByName[y.pal!.Name].Mounted)).ThenByDescending(x => x.Average(pick => (pick.pal.Melee + pick.pal.Shot) / 2)).ToList();
+var mountedTeamsOrdered = mountedTeams.OrderByDescending(x => x.Max(y => palByName[y.pal!.Name].Mounted)).ToList();
+var bestTeams = mountedTeamsOrdered.OrderByDescending(x => x.Average(pick => (pick.pal.Melee + pick.pal.Shot) / 2)).ToList();
 
-Print(speedTeams, palByName);
+Print(bestTeams, palByName);
 
 static int CountStrengths(IEnumerable<Typing> source) => CountBits(source, y => y.Strengths);
 static int CountWeaknesses(IEnumerable<Typing> source) => CountBits(source, y => y.Weaknesses);
@@ -42,7 +34,6 @@ static void Print(List<IEnumerable<(Typing typing, Pal pal)>> bestTeams, Diction
 {
     foreach(var bestTeam in bestTeams.Take(20))
     {
-        
         StringBuilder sb = new();
         foreach (var pal in bestTeam.Select(x => x.pal))
             sb.Append(string.Join(", " , $"#{pal.Number} {pal.Name}, "));

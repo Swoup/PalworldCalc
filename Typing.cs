@@ -42,7 +42,7 @@ namespace PalworldCalculator
                 return;
             }
             strengths = strong[a] | strong[b];
-            weaknesses = weak[a] & (~strong[b]) | weak[b] & (~strong[a]);
+            weaknesses = weak[a] & (~(strong[b] | b)) | weak[b] & (~(strong[a] | a));
             type = a | b;
         }
 
