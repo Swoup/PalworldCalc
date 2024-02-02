@@ -94,5 +94,45 @@ namespace PalworldCalculator
             };
             Assert.That(team.GetCoverage(x => x.Weaknesses), Is.EqualTo(PalTypes.Dark | PalTypes.Fire | PalTypes.Earth | PalTypes.Electricity));
         }
+
+        [Test]
+        public void Should_find_that_grass_ground_is_same_as_ground_grass()
+        {
+            Typing grassGround = new(PalTypes.Leaf, PalTypes.Earth);
+            Typing groundGrass = new(PalTypes.Earth, PalTypes.Leaf);
+
+            Assert.That(groundGrass, Is.EqualTo(grassGround));
+        }
+
+        [Test]
+        public void Test()
+        {
+            List<Typing> team1 = new()
+            {
+                new Typing(PalTypes.Ice, PalTypes.Dark),
+                new Typing(PalTypes.Dragon, PalTypes.Fire),
+                new Typing(PalTypes.Electricity, PalTypes.None),
+                new Typing(PalTypes.Leaf, PalTypes.Water),
+                new Typing(PalTypes.Leaf, PalTypes.Earth)
+            };
+
+             List<Typing> team2 = new()
+             {
+                new Typing(PalTypes.Ice, PalTypes.Dark),
+                new Typing(PalTypes.Dragon, PalTypes.Fire),
+                new Typing(PalTypes.Electricity, PalTypes.None),
+                new Typing(PalTypes.Leaf, PalTypes.Water),
+                new Typing(PalTypes.Earth, PalTypes.Leaf),
+            };
+
+            var offensiveCoverage1 = team1.Aggregate(PalTypes.None, (a,b) => a | b.Strengths);
+            var offensiveCoverage2 = team2.Aggregate(PalTypes.None, (a,b) => a | b.Strengths);
+
+            var defensiveWeaknesses1 = team1.Aggregate(PalTypes.None, (a,b) => a | b.Weaknesses);
+            var defensiveWeaknesses2 = team2.Aggregate(PalTypes.None, (a,b) => a | b.Weaknesses);
+
+            Assert.That(offensiveCoverage1, Is.EqualTo(offensiveCoverage2));
+            Assert.That(defensiveWeaknesses1, Is.EqualTo(defensiveWeaknesses2));
+        }
     }
 }

@@ -17,41 +17,37 @@ var theoricalCombos = actualPalTypes.GetKCombs(5).ToList();
 
 var theoricalCombosByStrengthAndWeaknesses = theoricalCombos.ToLookup(x => new {strength = CountStrengths(x), weakness = CountWeaknesses(x)});
 var ordered = theoricalCombosByStrengthAndWeaknesses.OrderByDescending(x => x.Key.strength).ThenBy(x => x.Key.weakness);
-var bestCombos = ordered.Take(2).SelectMany(x =>x).ToList();
-var palTeams = bestCombos.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => (pal.Melee + pal.Shot) / 2).ThenByDescending(pal => pal.Defence).First()))).ToList();
+var bestCombos = ordered.Take(1).SelectMany(x => x).ToList();
+var palTeams = bestCombos.Select(x => x.Select(y => (typing : y, pal : palsByType[y].OrderByDescending(pal => pal.Attack).ThenByDescending(pal => pal.Defence).First()))).ToList();
 var palByName = pals.ToDictionary(x => x.Name, y => y);
-var mountedTeams = palTeams.Where(x => x.Any(y => palByName[y.pal!.Name].Mounted >= 1300)).ToList();
+var mountedTeams = palTeams.Where(x => x.Any(y => palByName[y.pal!.Name].Mounted >= 1100)).ToList();
 var mountedTeamsOrdered = mountedTeams.OrderByDescending(x => x.Max(y => palByName[y.pal!.Name].Mounted)).ToList();
-var bestTeams = mountedTeamsOrdered.OrderByDescending(x => x.Average(pick => (pick.pal.Melee + pick.pal.Shot) / 2)).ToList();
+var bestTeams = mountedTeamsOrdered.OrderByDescending(x => x.Average(pick => pick.pal.Attack));
 
-Print(bestTeams.Take(30).ToList(), palByName);
+Print(bestTeams.Take(100).ToList());
 
 static int CountStrengths(IEnumerable<Typing> source) => CountBits(source, y => y.Strengths);
 static int CountWeaknesses(IEnumerable<Typing> source) => CountBits(source, y => y.Weaknesses);
 static int CountBits(IEnumerable<Typing> source, Func<Typing, PalTypes> selector) => source.GetCoverage(selector).GetSetBitCount();
 
-static void Print(List<IEnumerable<(Typing typing, Pal pal)>> bestTeams, Dictionary<string, Pal>  palByName)
+static void Print(List<IEnumerable<(Typing typing, Pal pal)>> bestTeams)
 {
+    if(bestTeams.Count == 0) 
+        Console.WriteLine("No team satisfying requirements found");
+        
     foreach(var bestTeam in bestTeams)
     {
         StringBuilder sb = new();
-        foreach (var pal in bestTeam.Select(x => x.pal))
-            sb.Append(string.Join(", " , $"#{pal.Number} {pal.Name}, "));
-        Console.WriteLine(sb);
-    }
-    foreach(var bestTeam in bestTeams)
-    {
-        Console.WriteLine();
-        StringBuilder sb = new();
-        StringBuilder candidates = new();
-        foreach ((Typing typing, Pal? pal) in bestTeam) 
+        PalTypes strengths = PalTypes.None;
+        PalTypes weakness = PalTypes.None;
+        foreach ((Typing typing, Pal pal) in bestTeam)
         {
-            sb.Append('[').Append(typing).Append(']').Append(" and ");
-            candidates.Append($"Pal picked for type {typing} is {string.Join(", " , $"#{palByName[pal!.Name].Number} {pal.Name}")} \n");
+            sb.Append(string.Join(", " , $"#{pal.Number} {pal.Name}, "));
+            strengths |= typing.Strengths;
+            weakness |= typing.Weaknesses;
         }
-        sb.Remove(sb.Length -3, 3);
-        Console.WriteLine($"{sb} with offensive coverage {bestTeam.Select(x => x.typing).GetCoverage(x => x.Strengths)} and defensive weaknesses {bestTeam.Select(x => x.typing).GetCoverage(x => x.Weaknesses)}");
-        Console.WriteLine($"{candidates}");
+        sb.Append($"strong against {(strengths.GetSetBitCount() == 9 ? "all types" : strengths)} and weak against {weakness} and average attack of {bestTeam.Average(x => x.pal.Attack)} and a top mount speed of {bestTeam.Max(x => x.pal.Mounted)} \n");
+        Console.WriteLine(sb);
     }
     Console.WriteLine();
 }
